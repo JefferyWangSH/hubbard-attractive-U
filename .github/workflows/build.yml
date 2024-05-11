@@ -1,0 +1,80 @@
+name: build-hubbard-attractive-u
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CC: gcc
+      CXX: g++
+
+    steps:
+      - name: Add oneAPI to apt
+        run: |
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt-get update
+        
+      - name: Install Intel oneAPI
+        run: sudo apt-get install intel-oneapi-mkl-devel
+      
+      - name: Setup Intel oneAPI environment
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          printenv >> $GITHUB_ENV
+
+      - name: Install OpenMPI
+        run: |
+          sudo apt-get install openmpi-bin
+          sudo apt-get install openmpi-doc
+
+      - name: Install Boost
+        run: sudo apt-get install libboost-all-dev
+      
+      - name: Install Eigen3
+        run: |
+          wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+          tar -zxvf eigen-3.4.0.tar.gz
+          mkdir eigen-3.4.0/build && cd eigen-3.4.0/build
+          cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ..
+          sudo make install
+  
+      - name: Install xtl (dependance of xtensor)
+        run: |
+          git clone https://github.com/xtensor-stack/xtl.git xtl
+          mkdir xtl/build && cd xtl/build
+          cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=/usr/local ..
+          sudo make install
+          echo "xtl_DIR=/usr/local/share/cmake/xtl" >> $GITHUB_ENV
+  
+      - name: Install xtensor
+        run: |
+          git clone https://github.com/xtensor-stack/xtensor.git xtensor
+          mkdir xtensor/build && cd xtensor/build
+          cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=/usr/local ..
+          sudo make install
+          echo "xtensor_DIR=/usr/local/share/cmake/xtensor" >> $GITHUB_ENV
+
+      - name: Checkout project code
+        uses: actions/checkout@v3
+
+      - name: Build the project with CMake
+        run: |
+          if [ ! -d ${{github.workspace}}/build ]; then mkdir -p ${{github.workspace}}/build; fi
+          cd ${{github.workspace}}/build
+          cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${{github.workspace}}
+          make -j4
+      
+      - name: Print the helping messages
+        run: ${{github.workspace}}/build/hubbard-attractive-u -h
