@@ -67,6 +67,7 @@ namespace DQMC {
                     << fmt_param_int % "Number of imag-time slice " % joiner % params.nt
                     << fmt_param_double % "Imag-time spacing" % joiner % params.dt
                     << fmt_param_int % "Stabilization pace" % joiner % params.stabilization_pace
+                    << fmt_param_str % "FFT-implemented expK mult." % joiner % bool2str(params.is_fft)
                     << std::endl;
 
             ostream << ">> Measurement Params:\n\n"
@@ -102,11 +103,11 @@ namespace DQMC {
             else { ostream << boost::format("\n>> The simulation finished in %.2f s.\n") % sec << std::endl; }
 
             // print the equal-time/dynamic wrapping errors
-            if (meas_handle.isEqualTime() && meas_handle.isDynamic()) {
+            if ((meas_handle.isWarmUp() || meas_handle.isEqualTime()) && meas_handle.isDynamic()) {
                 ostream << boost::format(">> Maximum of the wrapping error: %.5e (equal-time) and %.5e (dynamic).\n")
                         % core.equaltimeWrapError() % core.dynamicWrapError() << std::endl;
             }
-            else if (meas_handle.isEqualTime()) {
+            else if (meas_handle.isWarmUp() || meas_handle.isEqualTime()) {
                 ostream << boost::format(">> Maximum of the wrapping error: %.5e (equal-time).\n") % core.equaltimeWrapError() << std::endl;
             }
             else if (meas_handle.isDynamic()) {

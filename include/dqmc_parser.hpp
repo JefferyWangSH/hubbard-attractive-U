@@ -49,7 +49,13 @@ namespace DQMC {
         void parse_toml_config(std::string_view toml_config, int world_size, DQMC::Params& params)
         {
             // parse the configuration file
-            auto config = toml::parse_file(toml_config);
+            toml::table config;
+            try { config = toml::parse_file(toml_config); }
+            catch (const toml::parse_error& err) {
+                throw std::runtime_error(
+                    boost::str(boost::format("DQMC::Parser::parse_toml_config(): parsing failed.\n%s") % err)
+                );
+            }
 
             params.nnt = config["Model"]["HubbardAttractiveU"]["nnt"].value_or(1.0);
             params.u = config["Model"]["HubbardAttractiveU"]["u"].value_or(4.0);
@@ -64,6 +70,7 @@ namespace DQMC {
             params.nt = config["MonteCarlo"]["nt"].value_or(160);
             params.dt = params.beta / params.nt;
             params.stabilization_pace = config["MonteCarlo"]["stabilization_pace"].value_or(10);
+            params.is_fft = config["MonteCarlo"]["is_fft"].value_or(false);
 
             params.sweeps_warmup = config["Measurement"]["sweeps_warmup"].value_or(1000);
             // distribute the measurement tasks to a batch of processors

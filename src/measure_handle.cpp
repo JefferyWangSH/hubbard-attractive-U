@@ -46,11 +46,13 @@ namespace Measurement {
             // NOTE: empty input {} for 0-dimensional (scalar) observables
             const auto& obsname = it.first;
             auto& obs = it.second;
-            if (obsname == "DoubleOccupation"         ) { obs->set_shape(this->m_bin_num, {}); }
-            if (obsname == "SWavePairingCorrelation"  ) { obs->set_shape(this->m_bin_num, {}); }
-            if (obsname == "GreenFunctions"           ) { obs->set_shape(this->m_bin_num, {nk, nt}); }
-            if (obsname == "DensityOfStates"          ) { obs->set_shape(this->m_bin_num, {nt}); }
-            if (obsname == "DynamicSpinSusceptibility") { obs->set_shape(this->m_bin_num, {nt}); }
+            if (obsname == "FillingNumber"              ) { obs->set_shape(this->m_bin_num, {}); }
+            if (obsname == "DoubleOccupation"           ) { obs->set_shape(this->m_bin_num, {}); }
+            if (obsname == "SWavePairingCorrelation"    ) { obs->set_shape(this->m_bin_num, {}); }
+            if (obsname == "GreenFunctions"             ) { obs->set_shape(this->m_bin_num, {nk, nt}); }
+            if (obsname == "DensityOfStates"            ) { obs->set_shape(this->m_bin_num, {nt}); }
+            if (obsname == "DynamicSpinSusceptibilityZZ") { obs->set_shape(this->m_bin_num, {nt}); }
+            if (obsname == "DynamicSpinSusceptibility-+") { obs->set_shape(this->m_bin_num, {nt}); }
         }
     }
 

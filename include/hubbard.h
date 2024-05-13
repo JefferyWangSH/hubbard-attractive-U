@@ -14,6 +14,9 @@
 #define EIGEN_VECTORIZE_SSE4_2
 #include <Eigen/Core>
 #include <string>
+#include <memory>
+#include <functional>
+#include "utils/fft_solver.hpp"
 
 namespace DQMC { struct Params; class Core; }
 namespace Lattice { class SquareLattice; }
@@ -71,6 +74,16 @@ namespace Model {
 
         protected:
             // ------------------------------  Multiply the exponentials of hopping kernels  ----------------------------------
+            bool m_is_fft{};
+            std::function<void(refGreenFunc)> m_multiply_expK_from_left{};
+            std::function<void(refGreenFunc)> m_multiply_expK_from_right{};
+            std::function<void(refGreenFunc)> m_multiply_inv_expK_from_left{};
+            std::function<void(refGreenFunc)> m_multiply_inv_expK_from_right{};
+            std::function<void(refGreenFunc)> m_multiply_adj_expK_from_left{};
+
+            void link2naive();
+            void link2fft();
+            
             Eigen::MatrixXd m_expK{};
             Eigen::MatrixXd m_inv_expK{};
             void multiply_expK_from_left(refGreenFunc gf) const;
@@ -79,12 +92,16 @@ namespace Model {
             void multiply_inv_expK_from_right(refGreenFunc gf) const;
             void multiply_adj_expK_from_left(refGreenFunc gf) const;
             
-            // TODO: FFT multiply expK.
-            // void multiply_expK_from_left_with_fft(refGreenFunc gf) const;
-            // void multiply_expK_from_right_with_fft(refGreenFunc gf) const;
-            // void multiply_inv_expK_from_left_with_fft(refGreenFunc gf) const;
-            // void multiply_inv_expK_from_right_with_fft(refGreenFunc gf) const;
-            // void multiply_adj_expK_from_left_with_fft(refGreenFunc gf) const;
+            using fftsolver = Utils::FFTSolver<double,2>;
+            using ptrfftsolver = std::unique_ptr<fftsolver>;
+            ptrfftsolver m_fftsolver{};
+            Eigen::VectorXd m_expK_eigens{};
+            Eigen::VectorXd m_inv_expK_eigens{};
+            void multiply_expK_from_left_with_fft(refGreenFunc gf) const;
+            void multiply_expK_from_right_with_fft(refGreenFunc gf) const;
+            void multiply_inv_expK_from_left_with_fft(refGreenFunc gf) const;
+            void multiply_inv_expK_from_right_with_fft(refGreenFunc gf) const;
+            void multiply_adj_expK_from_left_with_fft(refGreenFunc gf) const;
 
             // -----------------------------  Multiply the exponentials of coupling kernels  ----------------------------------
             void multiply_expV_from_left(refGreenFunc gf, const int t) const;

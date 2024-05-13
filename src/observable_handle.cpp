@@ -15,19 +15,23 @@
 namespace Observable {
 
     std::map<Handle::observable_name, Handle::metadata_type> Handle::m_metadata = {
-        {"DoubleOccupation",          {"Double occupation",           "equaltime"}},
-        {"SWavePairingCorrelation",   {"S-wave pairing correlation",  "equaltime"}},
-        {"GreenFunctions",            {"Green's functions",           "dynamic"  }},
-        {"DensityOfStates",           {"Local density of states",     "dynamic"  }},
-        {"DynamicSpinSusceptibility", {"Dynamic spin susceptibility", "dynamic"  }},
+        {"FillingNumber",               {"Filling number",                   "equaltime"}},
+        {"DoubleOccupation",            {"Double occupation",                "equaltime"}},
+        {"SWavePairingCorrelation",     {"S-wave pairing correlation",       "equaltime"}},
+        {"GreenFunctions",              {"Green's functions",                "dynamic"  }},
+        {"DensityOfStates",             {"Local density of states",          "dynamic"  }},
+        {"DynamicSpinSusceptibilityZZ", {"Dynamic spin susceptibility (zz)", "dynamic"  }},
+        {"DynamicSpinSusceptibility-+", {"Dynamic spin susceptibility (-+)", "dynamic"  }},
     };
 
     Handle::observable_name_list Handle::allObservables = {
+        "FillingNumber",
         "DoubleOccupation",
         "SWavePairingCorrelation",
         "GreenFunctions",
         "DensityOfStates",
-        "DynamicSpinSusceptibility",
+        "DynamicSpinSusceptibilityZZ",
+        "DynamicSpinSusceptibility-+",
     };
 
     bool Handle::check_validity(const observable_name name)
@@ -77,11 +81,13 @@ namespace Observable {
             ptrobs->set_name_and_desc(obsname, obsdesc);
 
             // link to methods
-            if (obsname == "DoubleOccupation"         ) { ptrobs->link2method(Methods::measure_double_occupation); }
-            if (obsname == "GreenFunctions"           ) { ptrobs->link2method(Methods::measure_green_functions); }
-            if (obsname == "DensityOfStates"          ) { ptrobs->link2method(Methods::measure_density_of_states); }
-            if (obsname == "SWavePairingCorrelation"  ) { ptrobs->link2method(Methods::measure_swave_pairing_correlation); }
-            if (obsname == "DynamicSpinSusceptibility") { ptrobs->link2method(Methods::measure_dynamic_spin_susceptibility); }
+            if (obsname == "FillingNumber"              ) { ptrobs->link2method(Methods::measure_filling_number); }
+            if (obsname == "DoubleOccupation"           ) { ptrobs->link2method(Methods::measure_double_occupation); }
+            if (obsname == "GreenFunctions"             ) { ptrobs->link2method(Methods::measure_green_functions); }
+            if (obsname == "DensityOfStates"            ) { ptrobs->link2method(Methods::measure_density_of_states); }
+            if (obsname == "SWavePairingCorrelation"    ) { ptrobs->link2method(Methods::measure_swave_pairing_correlation); }
+            if (obsname == "DynamicSpinSusceptibilityZZ") { ptrobs->link2method(Methods::measure_dynamic_spin_susceptibility_zz); }
+            if (obsname == "DynamicSpinSusceptibility-+") { ptrobs->link2method(Methods::measure_dynamic_spin_susceptibility_mp); }
 
             if (Handle::is_equaltime(obsname)) { this->m_obs_list_equaltime.emplace_back(ptrobs); }
             if (Handle::is_dynamic(obsname)) { this->m_obs_list_dynamic.emplace_back(ptrobs); }
@@ -103,7 +109,7 @@ namespace Observable {
         else {
             // else return an empty observable object
             std::cerr << "Warning at Observable::Handle::find(): "
-                      << "no observable found with given name, note an empty Observable object is returned."
+                      << "no observable found with given name, and note that an empty Observable object was returned."
                       << std::endl;
             return observable();
         }

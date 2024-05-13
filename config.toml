@@ -20,6 +20,7 @@
     beta = 8.0                      # inverse temperature
     nt = 160                        # imaginary-time slices
     stabilization_pace = 10         # pace of numeric stabilization
+    is_fft = false                  # whether to enable fft-implemented expK mult methods
 
 [Measurement]
     sweeps_warmup = 1000            # local MC sweeps for thermalization
@@ -29,13 +30,15 @@
     
     # Supported physical observables
     #
-    #   1. DoubleOccupation                     (equaltime)
-    #   2. SWavePairingCorrelation              (equaltime)
-    #   3. GreenFunctions                       (dynamic)
-    #   4. DensityOfStates                      (dynamic)
-    #   5. DynamicSpinSusceptibility            (dynamic)
+    #   1. FillingNumber                        (equaltime)
+    #   2. DoubleOccupation                     (equaltime)
+    #   3. SWavePairingCorrelation              (equaltime)
+    #   4. GreenFunctions                       (dynamic)
+    #   5. DensityOfStates                      (dynamic)
+    #   6. DynamicSpinSusceptibilityZZ          (dynamic)
+    #   7. DynamicSpinSusceptibility-+          (dynamic)
     #
     # option 'all/All'  : measure all supported observables
     # option 'none/None': measure nothing
 
-    observables = [ "all" ]
+    observables = [ "none" ]
