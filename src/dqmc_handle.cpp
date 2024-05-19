@@ -127,7 +127,7 @@ namespace DQMC {
                     if (meas_handle.isDynamic()) {
                         core.sweep_for_dynamic_green_functions(model);
                         meas_handle.measure_dynamic_observables(core, model, lattice);
-                        // donot measure equal-time observables at this point
+                        // donot measure equal-time observables at this step
                     }
                     else {
                         core.sweep_from_0_to_beta(model);

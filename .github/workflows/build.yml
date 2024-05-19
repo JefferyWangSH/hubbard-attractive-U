@@ -80,4 +80,4 @@ jobs:
         run: ${{github.workspace}}/build/hubbard-attractive-u -h
       
       - name: Run the code
-        run: ${{github.workspace}}/build/hubbard-attractive-u -c ${{github.workspace}}/config.toml
+        run: mpirun -np 4 --oversubscribe ${{github.workspace}}/build/hubbard-attractive-u -c ${{github.workspace}}/config.toml

@@ -30,15 +30,14 @@
     
     # Supported physical observables
     #
-    #   1. FillingNumber                        (equaltime)
-    #   2. DoubleOccupation                     (equaltime)
-    #   3. SWavePairingCorrelation              (equaltime)
-    #   4. GreenFunctions                       (dynamic)
-    #   5. DensityOfStates                      (dynamic)
-    #   6. DynamicSpinSusceptibilityZZ          (dynamic)
-    #   7. DynamicSpinSusceptibility-+          (dynamic)
+    #   1. FillingNumber                            (equaltime)
+    #   2. DoubleOccupation                         (equaltime)
+    #   3. StaticSWavePairingCorrelation            (equaltime)
+    #   4. DynamicGreenFunctions                    (dynamic)
+    #   5. LocalDensityOfStates                     (dynamic)
+    #   6. LocalDynamicTransverseSpinCorrelation    (dynamic)
     #
     # option 'all/All'  : measure all supported observables
     # option 'none/None': measure nothing
 
-    observables = [ "none" ]
+    observables = [ "all" ]

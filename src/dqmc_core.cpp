@@ -297,7 +297,7 @@ namespace DQMC {
             assert(this->m_svdstack_left->empty());
             assert(this->m_svdstack_right->StackLength() == stack_length);
 
-            // initialize the dynamic green's functions: at t = 0, gt0 = g00, g0t = g00-1
+            // initialize the dynamic green's functions: for t -> 0, gft0(0) = gftt(0), gf0t = -(1-gftt(0))
             *this->m_gft0 = *this->m_gftt;
             *this->m_gf0t = *this->m_gftt - BStacks::Identity(this->m_ng, this->m_ng);
 
@@ -330,8 +330,7 @@ namespace DQMC {
 
                     // compute the equal-time/dynamic Green's function from scratch
                     // every 'stabilization_pace' wrapping steps and collect the wrapping error.
-                    Utils::StableNumerics::compute_equaltime_gf(*this->m_svdstack_left, *this->m_svdstack_right, temp_gftt);
-                    Utils::StableNumerics::compute_dynamic_gf(*this->m_svdstack_left, *this->m_svdstack_right, temp_gft0, temp_gf0t);
+                    Utils::StableNumerics::compute_dynamic_gf(*this->m_svdstack_left, *this->m_svdstack_right, temp_gft0, temp_gf0t, temp_gftt);
 
                     // compute the wrapping errors
                     Utils::StableNumerics::matrix_compare_error(temp_gftt, *this->m_gftt, temp_wrap_error_tt);
@@ -349,13 +348,40 @@ namespace DQMC {
                 // save the Green's functions to the vectors
                 //
                 //  vecgftt = [ G(0,0), G(dt,dt), G(2dt,2dt), ... , G(beta-dt,beta-dt) ]
-                //  vecgft0 = [ G(beta,0), G(dt,0), G(2dt,0), ... , G(beta-dt,0) ]
-                //  vecgf0t = [ G(0,beta), G(0,dt), G(0,2dt), ... , G(0,beta-dt) ]
-                // TODO: fix
+                //  vecgft0 = [ G(0,0), G(dt,0), G(2dt,0), ... , G(beta-dt,0) ]
+                //  vecgf0t = [ G(0,0), G(0,dt), G(0,2dt), ... , G(0,beta-dt) ]
+                //
+                // with time grids [ 0, dt, 2dt, ..., beta-dt ].
+
+                // however, during our sweeping procedure, Green's functions are obtained at time grids [ beta, dt, 2dt, ..., beta-dt ].
+                // note that in practice, according to our wrapping rules,
+                // the dynamic Green's functions G(beta,0)/G(0,beta) are calculated as,
+                //
+                //    G(beta,0) = G(beta,beta) * B(beta,0) = (1 + B(beta,0))^-1 * B(beta,0) = G(0,0) * (G(0,0)^-1 - 1) = 1 - G(0,0)
+                //    G(0,beta) = -B(beta,0)^-1 * (1-G(0,0)) = -B(beta,0)^-1 * (1 - (1 + B(beta,0))^-1) = -G(0,0)
+                //
+                // hence special cares have to be taken at t=beta for dynamic Green's functions.
+                // for equal-time ones, G(beta,beta) = G(0,0) automatically.
+
+                // also note that by definition, the Matsubara Green's function $G(\tau)$ has a discontinuity at $\tau=0$;
+                // this is consistent with a long-distance behavior of $G(i\omega_n)\sim 1/|\omega_n|$.
+                // with this point in mind, we can define G(0) = G(0,0),
+                // and according to the anti-periodicity of Matsubara Green's function, we have
+                //
+                //      G(+beta) = G(beta,0) = -G(0,0)
+                //      G(-beta) = G(0,beta) = -G(0,0)
+                //
+                // which are not stored in our vector objects.
 
                 (*this->m_vecgftt)[t2index(t)] = *this->m_gftt;
-                (*this->m_vecgft0)[t2index(t)] = *this->m_gft0;
-                (*this->m_vecgf0t)[t2index(t)] = *this->m_gf0t;
+                if (t2index(t) != 0) {
+                    (*this->m_vecgft0)[t2index(t)] = *this->m_gft0;
+                    (*this->m_vecgf0t)[t2index(t)] = *this->m_gf0t;
+                }
+                else {
+                    (*this->m_vecgft0)[t2index(t)] = *this->m_gftt;
+                    (*this->m_vecgf0t)[t2index(t)] = *this->m_gftt;
+                }
             }
         }
     }

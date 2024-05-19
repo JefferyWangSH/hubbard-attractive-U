@@ -193,7 +193,7 @@ int main(int argc, char* argv[]) {
             DQMC::IO::print_observable(ofile, filling_num, false);
             reopen(ofile, std::string(output+"/filling.bins.out"), std::ios::out|std::ios::app);
             DQMC::IO::print_observable_data(ofile, filling_num, false);
-            // COMMENT OUT: npy file output
+            // // file output in the npy format
             // DQMC::IO::save_obsevable_data_to_file(filling_num, std::string(output+"/filling_num.npy"), "npy");
         }
 
@@ -205,44 +205,36 @@ int main(int argc, char* argv[]) {
             DQMC::IO::print_observable_data(ofile, double_occu, false);
         }
 
-        if (meas_handle->is_found("GreenFunctions")) {
-            const auto green_func = meas_handle->find("GreenFunctions");
+        if (meas_handle->is_found("DynamicGreenFunctions")) {
+            const auto green_func = meas_handle->find("DynamicGreenFunctions");
             reopen(ofile, std::string(output+"/gf.out"), std::ios::out|std::ios::trunc);
             DQMC::IO::print_observable(ofile, green_func, false);
             reopen(ofile, std::string(output+"/gf.bins.out"), std::ios::out|std::ios::app);
             DQMC::IO::print_observable_data(ofile, green_func, false);
         }
 
-        if (meas_handle->is_found("DensityOfStates")) {
-            const auto ldos = meas_handle->find("DensityOfStates");
+        if (meas_handle->is_found("LocalDensityOfStates")) {
+            const auto ldos = meas_handle->find("LocalDensityOfStates");
             reopen(ofile, std::string(output+"/ldos.out"), std::ios::out|std::ios::trunc);
             DQMC::IO::print_observable(ofile, ldos, false);
             reopen(ofile, std::string(output+"/ldos.bins.out"), std::ios::out|std::ios::app);
             DQMC::IO::print_observable_data(ofile, ldos, false);
         }
 
-        if (meas_handle->is_found("SWavePairingCorrelation")) {
-            const auto swave_pairing = meas_handle->find("SWavePairingCorrelation");
+        if (meas_handle->is_found("StaticSWavePairingCorrelation")) {
+            const auto swave_pairing = meas_handle->find("StaticSWavePairingCorrelation");
             reopen(ofile, std::string(output+"/swave.out"), std::ios::out|std::ios::trunc);
             DQMC::IO::print_observable(ofile, swave_pairing, false);
             reopen(ofile, std::string(output+"/swave.bins.out"), std::ios::out|std::ios::app);
             DQMC::IO::print_observable_data(ofile, swave_pairing, false);
         }
 
-        if (meas_handle->is_found("DynamicSpinSusceptibilityZZ")) {
-            const auto spin_suscept_zz = meas_handle->find("DynamicSpinSusceptibilityZZ");
-            reopen(ofile, std::string(output+"/spin_suscept_zz.out"), std::ios::out|std::ios::trunc);
-            DQMC::IO::print_observable(ofile, spin_suscept_zz, false);
-            reopen(ofile, std::string(output+"/spin_suscept_zz.bins.out"), std::ios::out|std::ios::app);
-            DQMC::IO::print_observable_data(ofile, spin_suscept_zz, false);
-        }
-
-        if (meas_handle->is_found("DynamicSpinSusceptibility-+")) {
-            const auto spin_suscept_mp = meas_handle->find("DynamicSpinSusceptibility-+");
-            reopen(ofile, std::string(output+"/spin_suscept_mp.out"), std::ios::out|std::ios::trunc);
-            DQMC::IO::print_observable(ofile, spin_suscept_mp, false);
-            reopen(ofile, std::string(output+"/spin_suscept_mp.bins.out"), std::ios::out|std::ios::app);
-            DQMC::IO::print_observable_data(ofile, spin_suscept_mp, false);
+        if (meas_handle->is_found("LocalDynamicTransverseSpinCorrelation")) {
+            const auto spin_corr = meas_handle->find("LocalDynamicTransverseSpinCorrelation");
+            reopen(ofile, std::string(output+"/spin_corr.out"), std::ios::out|std::ios::trunc);
+            DQMC::IO::print_observable(ofile, spin_corr, false);
+            reopen(ofile, std::string(output+"/spin_corr.bins.out"), std::ios::out|std::ios::app);
+            DQMC::IO::print_observable_data(ofile, spin_corr, false);
         }
 
         // output ising field configs

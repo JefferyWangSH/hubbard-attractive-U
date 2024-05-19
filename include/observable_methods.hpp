@@ -25,6 +25,10 @@ namespace Observable {
             using Lattice = Lattice::SquareLattice;
             using GF = DQMC::GF;
 
+            // NOTE: for the attractive-U hubbard model,
+            // both equal-time and dynamic Green's functions are automatically SU(2) symmetric, i.e. Gup = Gdn = G.
+            // this is, however, an artificial consequence of our HS decomposition.
+
             /*
              *
              *  Filling number of electrons
@@ -40,10 +44,9 @@ namespace Observable {
                 
                 double filling_num = 0.0;
                 for (auto t = 0; t < nt; ++t) {
-                    // SU2 symmetric Green's function, artificial consequence of our HS decomposition
                     const GF& gfttup = (*core.m_vecgftt)[t];
-                    const GF& gfttdn = (*core.m_vecgftt)[t];
-                    filling_num += (2. - (gfttup.trace()+gfttdn.trace()) / ns);
+                    const GF& gfttdn = gfttup;
+                    filling_num += 2. - (gfttup.trace()+gfttdn.trace()) / ns;
                 }
                 cache += filling_num / nt;
             }
@@ -62,7 +65,7 @@ namespace Observable {
                 double temp_double_occu = 0.0;
                 for (auto t = 0; t < nt; ++t) {
                     const GF& gfttup = (*core.m_vecgftt)[t];
-                    const GF& gfttdn = (*core.m_vecgftt)[t];
+                    const GF& gfttdn = gfttup;
                     for (auto i = 0; i < ns; ++i) {
                         temp_double_occu += (1.-gfttup(i,i)) * (1.-gfttdn(i,i));
                     }
@@ -72,13 +75,13 @@ namespace Observable {
 
             /*
              *
-             *  Green's function
+             *  Dynamic Green's functions
              *
              *    G(k,t) = < T c(k,t) c^+(k,0) >
              *           = 1/N \sum_{ij} exp( -i k*(rj-ri) ) * < T c(j,t) * c^+(i,0)>
              *
              */
-            static void measure_green_functions(obs_struct& cache, const DqmcCore& core,
+            static void measure_dynamic_green_functions(obs_struct& cache, const DqmcCore& core,
                 const MeasureHandle& handle, const Hubbard& model, const Lattice& lattice)
             {
                 const int ns = core.m_ns;
@@ -86,7 +89,8 @@ namespace Observable {
                 const int nk = handle.MomentumList().size();
 
                 for (auto t = 0; t < nt; ++t) {
-                    const GF& gft0 = (t==0)? (*core.m_vecgftt)[t] : (*core.m_vecgft0)[t]; // TODO: double check this
+                    // at t = 0, gft0 automatically degenerates to gf00
+                    const GF& gft0 = (*core.m_vecgft0)[t];
                     for (auto k = 0; k < nk; ++k) {
                         for (auto i = 0; i < ns; ++i) {
                             for (auto j = 0; j < ns; ++j) {
@@ -100,31 +104,31 @@ namespace Observable {
 
             /*
              *
-             *  Local density of state D = 1/N \sum_i < T c(i,t) * c^+(i,0) >
+             *  Local density of states D = 1/N \sum_i < T c(i,t) * c^+(i,0) >
              *
              */
-            static void measure_density_of_states(obs_struct& cache, const DqmcCore& core,
+            static void measure_local_density_of_states(obs_struct& cache, const DqmcCore& core,
                 const MeasureHandle& handle, const Hubbard& model, const Lattice& lattice)
             {
                 const int nt = core.m_nt;
                 const int ns = core.m_ns;
 
                 for (auto t = 0; t < nt; ++t) {
-                    const GF& gft0 = (t==0)? (*core.m_vecgftt)[t] : (*core.m_vecgft0)[t]; // TODO: double check this
+                    const GF& gft0 = (*core.m_vecgft0)[t];
                     cache(t) += gft0.trace() / ns;
                 }
             }
 
             /*
              *
-             *  S-wave superconducting pairing \Delta = 1/sqrt(N) \sum_i c_dn(i) * c_up(i)
+             *  Static s-wave superconducting pairing \Delta = 1/sqrt(N) \sum_i c_dn(i) * c_up(i)
              *  Pairing correlation function Ps:
              *
              *      Ps  =  Delta^+ * Delta + Delta * Delta^+
              *          =  1/N \sum_{ij} ( (1-Gup)(j,i) * (1-Gdn)(j,i) + Gup(i,j) * Gdn(i,j) )
              *
              */
-            static void measure_swave_pairing_correlation(obs_struct& cache, const DqmcCore& core,
+            static void measure_static_swave_pairing_correlation(obs_struct& cache, const DqmcCore& core,
                 const MeasureHandle& handle, const Hubbard& model, const Lattice& lattice)
             {
                 const int nt = core.m_nt;
@@ -134,8 +138,8 @@ namespace Observable {
                 for (auto t = 0; t < nt; ++t) {
                     // gf(i,j) = < c(i) c^+(j) >, and gfc(i,j) = < c^+(j) c(i) >
                     const GF& gfttup = (*core.m_vecgftt)[t];
-                    const GF& gfttdn = (*core.m_vecgftt)[t];
-                    const GF& gfcttup = GF::Identity(core.m_ng,core.m_ng) - gfttup;
+                    const GF& gfcttup = GF::Identity(core.m_ng, core.m_ng) - gfttup;
+                    const GF& gfttdn = gfttup;
                     const GF& gfcttdn = gfcttup;
                     for (auto i = 0; i < ns; ++i) {
                         for (auto j = 0; j < ns; ++j) {
@@ -148,30 +152,42 @@ namespace Observable {
 
             /*
              *
-             *  (Local) Dynamic spin susceptibility (zz)
+             *  Local dynamic transverse spin correlation function
              *
-             *      chi_{zz} = \sum_q < T Sz(q,t) Sz(q,0) >
-             *               = 
+             *      \chi_{\perp}(t) = chi_{xx} + chi_{yy} = 1/2 ( chi_{-+} + chi_{+-} )
+             *                      = 1/(2N) \sum_q ( < T S^-(q,t) S^+(q,0) > + < T S^+(q,t) S^-(q,0) > )
+             *                      = 1/(2N) \sum_i ( < T S^-(i,t) S^+(i,0) > + < T S^+(i,t) S^-(i,0) > )
              *
+             *                      = 1/(2N) \sum_i ( < T cdn^+(i,t) cdn(i,0) > < T cup(i,t) cup^+(i,0) >
+             *                                      + < T cup^+(i,t) cup(i,0) > < T cdn(i,t) cdn^+(i,0) > )
+             *
+             *                      = 1/(2N) \sum_i ( [delta_{t,0} I - Gdn(0,t)]_{ii} * [Gup(t,0)]_{ii}
+             *                                      + [delta_{t,0} I - Gup(0,t)]_{ii} * [Gdn(t,0)]_{ii} )
+             *
+             *                      = 1/N \sum_i ( delta_{t,0} - G0t(i,i) ) * Gt0(i,i)
+             *  
+             *  where in the last step we have made use of the fact that Gup = Gdn = G.
+             *  For the attractive-U hubbard model, the HS decomposition we adopted preserves the SU(2) symmetry,
+             *  such that it's equivalent to measure either \chi_perp or 2\chi_zz for evaluating the transeverse spin correlation.
              */
-            static void measure_dynamic_spin_susceptibility_zz(obs_struct& cache, const DqmcCore& core,
+            static void measure_local_dynamic_transverse_spin_correlation(obs_struct& cache, const DqmcCore& core,
                 const MeasureHandle& handle, const Hubbard& model, const Lattice& lattice)
             {
-                // TODO
-            }
+                const int nt = core.m_nt;
+                const int ns = core.m_ns;
 
-            /*
-             *
-             *  (Local) Dynamic spin susceptibility (-+)
-             *
-             *      chi_{-+} = \sum_q < T S_-(q,t) S_+(q,0) >
-             *               = 
-             *
-             */
-            static void measure_dynamic_spin_susceptibility_mp(obs_struct& cache, const DqmcCore& core,
-                const MeasureHandle& handle, const Hubbard& model, const Lattice& lattice)
-            {
-                // TODO
+                for (auto t = 0; t < nt; ++t) {
+                    const GF& gft0up = (*core.m_vecgft0)[t];
+                    const GF& gf0tup = (*core.m_vecgf0t)[t];
+                    const GF& gft0dn = gft0up;
+                    const GF& gf0tdn = gf0tup;
+                    const auto deltat0 = static_cast<int>(t==0);
+                    double temp_trans_spin_corr = 0.0;
+                    for (auto i = 0; i < ns; ++i) {
+                        temp_trans_spin_corr += (deltat0-gf0tdn(i,i)) * gft0up(i,i) + (deltat0-gf0tup(i,i)) * gft0dn(i,i);
+                    }
+                    cache(t) += temp_trans_spin_corr / (2*ns);
+                }
             }
     };
 
