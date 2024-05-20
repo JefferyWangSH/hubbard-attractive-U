@@ -1,0 +1,43 @@
+## example config input
+## DQMC coniguration file with toml
+
+[Model.HubbardAttractiveU]
+    nnt = 1.0                       # nearest neighbor hopping
+    u = 4.0                         # absolute value of on-site interaction
+    mu = 0.0                        # chemical potential
+
+[Lattice.SquareLattice]
+    nl = 4                          # linear size of the lattice 
+
+    # List of momenta for measuring momentum-dependent observables
+    # the following options are supported
+    #   
+    #    X2K2XLine, Gamma2MLine, AllKstars
+    #
+    momentum_list = "AllKstars"
+
+[MonteCarlo]
+    beta = 8.0                      # inverse temperature
+    nt = 160                        # imaginary-time slices
+    stabilization_pace = 10         # pace of numeric stabilization
+    is_fft = false                  # whether to enable fft-implemented expK mult methods
+
+[Measurement]
+    sweeps_warmup = 1000            # local MC sweeps for thermalization
+    bin_num = 20                    # number of bins for measurements
+    bin_capacity = 100              # capacity (number of MC samples) of one bin
+    sweeps_between_bins = 10        # MC sweeps between adjoining bins (avoid correlation)
+    
+    # Supported physical observables
+    #
+    #   1. FillingNumber                            (equaltime)
+    #   2. DoubleOccupation                         (equaltime)
+    #   3. StaticSWavePairingCorrelation            (equaltime)
+    #   4. DynamicGreenFunctions                    (dynamic)
+    #   5. LocalDensityOfStates                     (dynamic)
+    #   6. LocalDynamicTransverseSpinCorrelation    (dynamic)
+    #
+    # option 'all/All'  : measure all supported observables
+    # option 'none/None': measure nothing
+
+    observables = [ "all" ]

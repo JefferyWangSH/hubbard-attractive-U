@@ -49,16 +49,16 @@ int main(int argc, char* argv[]) {
     boost::program_options::variables_map vm;
 
     opts.add_options()
-        ("help,h", "display this information")
+        ("help,h", "display this information.")
         ("config,c",
          boost::program_options::value<std::string>(&config)->default_value("./example/config.toml"),
-         "path of the toml configuration file, default: ./example/config.toml")
+         "path of the toml configuration file, default: ./example/config.toml.")
         ("output,o",
          boost::program_options::value<std::string>(&output)->default_value("./example"),
-         "folder path which saves the program output, default: ./example")
+         "path of the folder where the program output are saved, default: ./example.")
         ("fields,f",
          boost::program_options::value<std::string>(&ising_fields),
-         "path of the ising configurations, if not assigned the fields are going to be set up randomly.");
+         "path of the file where initial configurations of the auxiliary Ising fields are saved. (if not assigned, the field configurations are going to be set up randomly.)");
 
     // parse the command line options
     try { boost::program_options::store(parse_command_line(argc, argv, opts), vm); }
@@ -223,9 +223,9 @@ int main(int argc, char* argv[]) {
 
         if (meas_handle->is_found("StaticSWavePairingCorrelation")) {
             const auto swave_pairing = meas_handle->find("StaticSWavePairingCorrelation");
-            reopen(ofile, std::string(output+"/swave.out"), std::ios::out|std::ios::trunc);
+            reopen(ofile, std::string(output+"/swave_corr.out"), std::ios::out|std::ios::trunc);
             DQMC::IO::print_observable(ofile, swave_pairing, false);
-            reopen(ofile, std::string(output+"/swave.bins.out"), std::ios::out|std::ios::app);
+            reopen(ofile, std::string(output+"/swave_corr.bins.out"), std::ios::out|std::ios::app);
             DQMC::IO::print_observable_data(ofile, swave_pairing, false);
         }
 

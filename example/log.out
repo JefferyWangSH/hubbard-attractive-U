@@ -1,0 +1,47 @@
+>> Current time: 2024-May-20 14:33:55
+
+>> Distribute tasks to 4 processors, with the master processor being ln72.para.bscc.
+
+>> Configurations of ising fields initialized randomly.
+
+>> Initialization finished.
+
+>> The simulation is going to get started with parameters below:
+
+>> Model: HubbardAttractiveU
+
+         Nearest hopping 'nnt'     ->               1.000
+       Chemical potential 'mu'     ->               0.000
+       On-site interaction 'u'     ->               4.000
+
+>> Lattice: SquareLattice
+
+              Linear size 'nl'     ->                   4
+                 Momentum list     ->           AllKstars
+
+>> MonteCarlo Params:
+
+           Inverse temperature     ->               8.000
+    Number of imag-time slice      ->                 160
+             Imag-time spacing     ->               0.050
+            Stabilization pace     ->                  10
+    FFT-implemented expK mult.     ->               False
+
+>> Measurement Params:
+
+                       Warm up     ->                True
+            Equal-time measure     ->                True
+               Dynamic measure     ->                True
+             Sweeps for warmup     ->                1000
+                Number of bins     ->                  20
+                Sweeps per bin     ->                 100
+           Sweeps between bins     ->                  10
+
+>> Warming up [>                                                 ] 0% 0.000s>> Warming up [=====>                                            ] 10% 0.381s>> Warming up [==========>                                       ] 20% 0.821s>> Warming up [===============>                                  ] 30% 1.210s>> Warming up [====================>                             ] 40% 1.576s>> Warming up [=========================>                        ] 50% 1.971s>> Warming up [==============================>                   ] 60% 2.340s>> Warming up [===================================>              ] 69% 2.701s>> Warming up [========================================>         ] 80% 3.078s>> Warming up [=============================================>    ] 89% 3.537s>> Warming up [==================================================] 100% 3.948s>> Warming up [==================================================] 100% 3.948s
+>> Measuring  [>                                                 ] 0% 0.000s>> Measuring  [====>                                             ] 9% 0.511s>> Measuring  [=========>                                        ] 19% 1.038s>> Measuring  [==============>                                   ] 28% 1.527s>> Measuring  [===================>                              ] 38% 2.033s>> Measuring  [=======================>                          ] 47% 2.583s>> Measuring  [============================>                     ] 57% 3.290s>> Measuring  [=================================>                ] 66% 3.998s>> Measuring  [======================================>           ] 76% 4.716s>> Measuring  [==========================================>       ] 85% 5.347s>> Measuring  [===============================================>  ] 95% 6.010s>> Measuring  [==================================================] 100% 6.339s
+
+>> The simulation finished in 11.03 s.
+
+>> Maximum of the wrapping error: 8.42904e-10 (equal-time) and 2.54441e-11 (dynamic).
+
+>> See the results under folder '../example'.
