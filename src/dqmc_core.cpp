@@ -15,6 +15,7 @@
 
 namespace DQMC {
     using BStacks = Eigen::MatrixXd;
+    using GF = Eigen::MatrixXd;
 
     void Core::initialize(const DqmcParams& params, const MeasureHandle& meas_handle)
     {
@@ -195,7 +196,7 @@ namespace DQMC {
                 this->m_svdstack_left->push(stacks);
 
                 // collect the wrapping error
-                BStacks temp_gftt = BStacks::Zero(this->m_ng, this->m_ng);
+                GF temp_gftt = GF::Zero(this->m_ng, this->m_ng);
                 double temp_wrap_error_tt = 0.0;
 
                 // compute the Green's function from scratch every 'stabilization_pace' wrapping steps
@@ -259,7 +260,7 @@ namespace DQMC {
                 this->m_svdstack_right->push(stacks);
 
                 // collect the wrapping error
-                BStacks temp_gftt = BStacks::Zero(this->m_ng, this->m_ng);
+                GF temp_gftt = GF::Zero(this->m_ng, this->m_ng);
                 double temp_wrap_error_tt = 0.0;
                 Utils::StableNumerics::compute_equaltime_gf(*this->m_svdstack_left, *this->m_svdstack_right, temp_gftt);
                 Utils::StableNumerics::matrix_compare_error(temp_gftt, *this->m_gftt, temp_wrap_error_tt);
@@ -299,7 +300,7 @@ namespace DQMC {
 
             // initialize the dynamic green's functions: for t -> 0, gft0(0) = gftt(0), gf0t = -(1-gftt(0))
             *this->m_gft0 = *this->m_gftt;
-            *this->m_gf0t = *this->m_gftt - BStacks::Identity(this->m_ng, this->m_ng);
+            *this->m_gf0t = *this->m_gftt - GF::Identity(this->m_ng, this->m_ng);
 
             // temporary stacks for stable multiplications of B matrices
             BStacks stacks = BStacks::Identity(this->m_ng, this->m_ng);
@@ -321,9 +322,9 @@ namespace DQMC {
                     this->m_svdstack_left->push(stacks);
 
                     // collect the wrapping errors
-                    BStacks temp_gftt = BStacks::Zero(this->m_ng, this->m_ng);
-                    BStacks temp_gft0 = BStacks::Zero(this->m_ng, this->m_ng);
-                    BStacks temp_gf0t = BStacks::Zero(this->m_ng, this->m_ng);
+                    GF temp_gftt = GF::Zero(this->m_ng, this->m_ng);
+                    GF temp_gft0 = GF::Zero(this->m_ng, this->m_ng);
+                    GF temp_gf0t = GF::Zero(this->m_ng, this->m_ng);
                     double temp_wrap_error_tt = 0.0;
                     double temp_wrap_error_t0 = 0.0;
                     double temp_wrap_error_0t = 0.0;
@@ -353,25 +354,27 @@ namespace DQMC {
                 //
                 // with time grids [ 0, dt, 2dt, ..., beta-dt ].
 
-                // however, during our sweeping procedure, Green's functions are obtained at time grids [ beta, dt, 2dt, ..., beta-dt ].
+                // however, during our sweeping procedure, Green's functions are obtained
+                // at time grids [ beta, dt, 2dt, ..., beta-dt ], sorted by the order of storage.
                 // note that in practice, according to our wrapping rules,
                 // the dynamic Green's functions G(beta,0)/G(0,beta) are calculated as,
                 //
                 //    G(beta,0) = G(beta,beta) * B(beta,0) = (1 + B(beta,0))^-1 * B(beta,0) = G(0,0) * (G(0,0)^-1 - 1) = 1 - G(0,0)
                 //    G(0,beta) = -B(beta,0)^-1 * (1-G(0,0)) = -B(beta,0)^-1 * (1 - (1 + B(beta,0))^-1) = -G(0,0)
                 //
-                // hence special cares have to be taken at t=beta for dynamic Green's functions.
                 // for equal-time ones, G(beta,beta) = G(0,0) automatically.
 
-                // also note that by definition, the Matsubara Green's function $G(\tau)$ has a discontinuity at $\tau=0$;
+                // recalling the anti-periodicity of Matsubara Green's functions,
+                // it's now plain to see that the Matsubara Green's function $G(\tau)$ has a discontinuity at $\tau=0/beta$;
                 // this is consistent with a long-distance behavior of $G(i\omega_n)\sim 1/|\omega_n|$.
-                // with this point in mind, we can define G(0) = G(0,0),
-                // and according to the anti-periodicity of Matsubara Green's function, we have
+                // with this point in mind, we can define
                 //
-                //      G(+beta) = G(beta,0) = -G(0,0)
-                //      G(-beta) = G(0,beta) = -G(0,0)
+                //      G(t->0,0) = G(0,0)
+                //      G(0,t->0) = -(1 - G(0,0))
                 //
-                // which are not stored in our vector objects.
+                // such that both G(t,0) and G(0,t) are continuous in [0,beta).
+                // as a consequence of our conventions here,
+                // special attentions have to be paid when time-displaced observables are evaluated with Wick's contraction.
 
                 (*this->m_vecgftt)[t2index(t)] = *this->m_gftt;
                 if (t2index(t) != 0) {
@@ -380,7 +383,7 @@ namespace DQMC {
                 }
                 else {
                     (*this->m_vecgft0)[t2index(t)] = *this->m_gftt;
-                    (*this->m_vecgf0t)[t2index(t)] = *this->m_gftt;
+                    (*this->m_vecgf0t)[t2index(t)] = *this->m_gftt - GF::Identity(this->m_ng, this->m_ng);
                 }
             }
         }

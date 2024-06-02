@@ -190,9 +190,9 @@ int main(int argc, char* argv[]) {
         if (meas_handle->is_found("FillingNumber")) {
             const auto filling_num = meas_handle->find("FillingNumber");
             reopen(ofile, std::string(output+"/filling.out"), std::ios::out|std::ios::trunc);
-            DQMC::IO::print_observable(ofile, filling_num, false);
-            reopen(ofile, std::string(output+"/filling.bins.out"), std::ios::out|std::ios::app);
-            DQMC::IO::print_observable_data(ofile, filling_num, false);
+            DQMC::IO::print_observable(ofile, filling_num, true);
+            reopen(ofile, std::string(output+"/filling.bins.out"), std::ios::out|std::ios::trunc);
+            DQMC::IO::print_observable_data(ofile, filling_num, true);
             // // file output in the npy format
             // DQMC::IO::save_obsevable_data_to_file(filling_num, std::string(output+"/filling_num.npy"), "npy");
         }
@@ -200,41 +200,41 @@ int main(int argc, char* argv[]) {
         if (meas_handle->is_found("DoubleOccupation")) {
             const auto double_occu = meas_handle->find("DoubleOccupation");
             reopen(ofile, std::string(output+"/double_occu.out"), std::ios::out|std::ios::trunc);
-            DQMC::IO::print_observable(ofile, double_occu, false);
-            reopen(ofile, std::string(output+"/double_occu.bins.out"), std::ios::out|std::ios::app);
-            DQMC::IO::print_observable_data(ofile, double_occu, false);
+            DQMC::IO::print_observable(ofile, double_occu, true);
+            reopen(ofile, std::string(output+"/double_occu.bins.out"), std::ios::out|std::ios::trunc);
+            DQMC::IO::print_observable_data(ofile, double_occu, true);
         }
 
         if (meas_handle->is_found("DynamicGreenFunctions")) {
             const auto green_func = meas_handle->find("DynamicGreenFunctions");
             reopen(ofile, std::string(output+"/gf.out"), std::ios::out|std::ios::trunc);
-            DQMC::IO::print_observable(ofile, green_func, false);
-            reopen(ofile, std::string(output+"/gf.bins.out"), std::ios::out|std::ios::app);
-            DQMC::IO::print_observable_data(ofile, green_func, false);
+            DQMC::IO::print_observable(ofile, green_func, true);
+            reopen(ofile, std::string(output+"/gf.bins.out"), std::ios::out|std::ios::trunc);
+            DQMC::IO::print_observable_data(ofile, green_func, true);
         }
 
         if (meas_handle->is_found("LocalDensityOfStates")) {
             const auto ldos = meas_handle->find("LocalDensityOfStates");
             reopen(ofile, std::string(output+"/ldos.out"), std::ios::out|std::ios::trunc);
-            DQMC::IO::print_observable(ofile, ldos, false);
-            reopen(ofile, std::string(output+"/ldos.bins.out"), std::ios::out|std::ios::app);
-            DQMC::IO::print_observable_data(ofile, ldos, false);
+            DQMC::IO::print_observable(ofile, ldos, true);
+            reopen(ofile, std::string(output+"/ldos.bins.out"), std::ios::out|std::ios::trunc);
+            DQMC::IO::print_observable_data(ofile, ldos, true);
         }
 
         if (meas_handle->is_found("StaticSWavePairingCorrelation")) {
             const auto swave_pairing = meas_handle->find("StaticSWavePairingCorrelation");
             reopen(ofile, std::string(output+"/swave_corr.out"), std::ios::out|std::ios::trunc);
-            DQMC::IO::print_observable(ofile, swave_pairing, false);
-            reopen(ofile, std::string(output+"/swave_corr.bins.out"), std::ios::out|std::ios::app);
-            DQMC::IO::print_observable_data(ofile, swave_pairing, false);
+            DQMC::IO::print_observable(ofile, swave_pairing, true);
+            reopen(ofile, std::string(output+"/swave_corr.bins.out"), std::ios::out|std::ios::trunc);
+            DQMC::IO::print_observable_data(ofile, swave_pairing, true);
         }
 
         if (meas_handle->is_found("LocalDynamicTransverseSpinCorrelation")) {
             const auto spin_corr = meas_handle->find("LocalDynamicTransverseSpinCorrelation");
             reopen(ofile, std::string(output+"/spin_corr.out"), std::ios::out|std::ios::trunc);
-            DQMC::IO::print_observable(ofile, spin_corr, false);
-            reopen(ofile, std::string(output+"/spin_corr.bins.out"), std::ios::out|std::ios::app);
-            DQMC::IO::print_observable_data(ofile, spin_corr, false);
+            DQMC::IO::print_observable(ofile, spin_corr, true);
+            reopen(ofile, std::string(output+"/spin_corr.bins.out"), std::ios::out|std::ios::trunc);
+            DQMC::IO::print_observable_data(ofile, spin_corr, true);
         }
 
         // output ising field configs

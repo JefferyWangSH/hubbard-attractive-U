@@ -164,11 +164,16 @@ namespace Observable {
              *                      = 1/(2N) \sum_i ( [delta_{t,0} I - Gdn(0,t)]_{ii} * [Gup(t,0)]_{ii}
              *                                      + [delta_{t,0} I - Gup(0,t)]_{ii} * [Gdn(t,0)]_{ii} )
              *
-             *                      = 1/N \sum_i ( delta_{t,0} - G0t(i,i) ) * Gt0(i,i)
+             *                      = 1/N \sum_i ( delta_{t,0} - G(0,t)_{ii} ) * G(t,0)_{ii}
              *  
              *  where in the last step we have made use of the fact that Gup = Gdn = G.
              *  For the attractive-U hubbard model, the HS decomposition we adopted preserves the SU(2) symmetry,
              *  such that it's equivalent to measure either \chi_perp or 2\chi_zz for evaluating the transeverse spin correlation.
+             *
+             *  Due to our convention that G0t(t->0) = G(0,0) - 1 and Gt0(t->0) = G(0,0), the above formula can be simplified as
+             * 
+             *      \chi_{\perp}(t) = 1/N \sum_i (- G0t(i,i)) * Gt0(i,i)
+             *
              */
             static void measure_local_dynamic_transverse_spin_correlation(obs_struct& cache, const DqmcCore& core,
                 const MeasureHandle& handle, const Hubbard& model, const Lattice& lattice)
@@ -181,10 +186,9 @@ namespace Observable {
                     const GF& gf0tup = (*core.m_vecgf0t)[t];
                     const GF& gft0dn = gft0up;
                     const GF& gf0tdn = gf0tup;
-                    const auto deltat0 = static_cast<int>(t==0);
                     double temp_trans_spin_corr = 0.0;
                     for (auto i = 0; i < ns; ++i) {
-                        temp_trans_spin_corr += (deltat0-gf0tdn(i,i)) * gft0up(i,i) + (deltat0-gf0tup(i,i)) * gft0dn(i,i);
+                        temp_trans_spin_corr -= gf0tdn(i,i) * gft0up(i,i) + gf0tup(i,i) * gft0dn(i,i);
                     }
                     cache(t) += temp_trans_spin_corr / (2*ns);
                 }
