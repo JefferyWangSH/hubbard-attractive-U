@@ -59,8 +59,13 @@ namespace DQMC {
                     << std::endl;
 
             ostream << ">> Lattice: SquareLattice\n\n"
-                    << fmt_param_int % "Linear size 'nl'" % joiner % params.nl
-                    << fmt_param_str % "Momentum list" % joiner % params.momentum_list << std::endl;
+                    << fmt_param_int % "Linear size 'nl'" % joiner % params.nl;
+            if (auto momentum_list = std::get_if<std::string>(&params.momentum_list)) {
+                ostream << fmt_param_str % "Momentum list" % joiner % *momentum_list << std::endl;
+            }
+            else if (std::get_if<std::vector<int>>(&params.momentum_list)) {
+                ostream << fmt_param_str % "Momentum list" % joiner % "Custom" << std::endl;
+            }
 
             ostream << ">> MonteCarlo Params:\n\n"
                     << fmt_param_double % "Inverse temperature" % joiner % params.beta
@@ -297,7 +302,7 @@ namespace DQMC {
             boost::format fmt_momentum("%| 15d|%| 15d|%| 30.15f|%| 30.15f|");
             const std::size_t nkstars = lattice.allKstars().size();
             const std::size_t nk = handle.MomentumList().size();
-            ostream << fmt_info % nkstars % nk << std::endl;
+            ostream << fmt_info % nk % nkstars << std::endl;
             for (std::size_t k = 0; k < nk; ++k) {
                 const auto momentum_index = handle.MomentumList(k);
                 const auto momentum = lattice.momentum(momentum_index);

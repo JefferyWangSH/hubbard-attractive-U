@@ -12,9 +12,10 @@
     # List of momenta for measuring momentum-dependent observables
     # the following options are supported
     #   
-    #    X2K2XLine, Gamma2MLine, AllKstars
+    #    1. X2K2XLine, Gamma2MLine, AllKstars
+    #    2. list of ints for custom momenta
     #
-    momentum_list = "AllKstars"
+    momentum_list = "AllKstars"     # or momentum_list = [0,1,...]
 
 [MonteCarlo]
     beta = 8.0                      # inverse temperature

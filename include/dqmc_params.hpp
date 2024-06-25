@@ -12,6 +12,7 @@
 
 #include <set>
 #include <string>
+#include <variant>
 
 namespace DQMC {
 
@@ -32,8 +33,10 @@ namespace DQMC {
         int sweeps_warmup{};        // local MC sweeps for the warmup
         int stabilization_pace{};   // pace of numerical stabilization
 
+        // lattice momenta for momentum-dependent observables
+        std::variant<std::string, std::vector<int>> momentum_list{};
+
         std::set<std::string> observable_list{};    // list of observables to be measured
-        std::string momentum_list{};                // lattice momenta for momentum-dependent observables
         int bin_num{};                              // number of bins for measurements
         int bin_capacity{};                         // capcity of MC samples in one bin
         int sweeps_between_bins{};                  // MC sweeps between two adjoining bins

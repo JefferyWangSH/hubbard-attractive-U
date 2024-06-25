@@ -64,7 +64,24 @@ namespace DQMC {
             params.nl = config["Lattice"]["SquareLattice"]["nl"].value_or(4);
             params.ns = params.nl * params.nl;
             params.ng = params.ns;
-            params.momentum_list = config["Lattice"]["SquareLattice"]["momentum_list"].value_or("");
+
+            auto momentum_list = config["Lattice"]["SquareLattice"]["momentum_list"];
+            if (momentum_list.is_string()) {
+                params.momentum_list = momentum_list.value_or("");
+            }
+            else if (momentum_list.is_array()) {
+                std::vector<int> momenta;
+                toml::array* momentum_arr = momentum_list.as_array();
+                if (momentum_arr && momentum_arr->is_homogeneous<int64_t>()) {
+                    momenta.reserve(momentum_arr->size());
+                    for (auto&& el : *momentum_arr) {
+                        momenta.emplace_back(el.value_or(0));
+                    }
+                    params.momentum_list = momenta;
+                }
+                else { throw std::runtime_error("DQMC::Parser::parse_toml_config(): invalid input momentum list."); }
+            }
+            else { throw std::runtime_error("DQMC::Parser::parse_toml_config(): invalid input momentum list."); }
 
             params.beta = config["MonteCarlo"]["beta"].value_or(8.0);
             params.nt = config["MonteCarlo"]["nt"].value_or(160);

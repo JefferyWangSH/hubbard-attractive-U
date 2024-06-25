@@ -22,10 +22,20 @@ namespace Measurement {
         this->m_sweeps_between_bins = params.sweeps_between_bins;
 
         this->m_list = params.observable_list;
-        if (params.momentum_list == "AllKstars") { this->m_momentum_list = lattice.allKstars(); }
-        else if (params.momentum_list == "X2K2XLine") { this->m_momentum_list = lattice.x2k2xLine(); }
-        else if (params.momentum_list == "Gamma2MLine") { this->m_momentum_list = lattice.gamma2mLine(); }
-        else { throw std::runtime_error("Measurement::Handle::initialize(): invalid momentum list."); }
+
+        if (auto momentum_list = std::get_if<std::string>(&params.momentum_list)) {
+            if (*momentum_list == "AllKstars") { this->m_momentum_list = lattice.allKstars(); }
+            else if (*momentum_list == "X2K2XLine") { this->m_momentum_list = lattice.x2k2xLine(); }
+            else if (*momentum_list == "Gamma2MLine") { this->m_momentum_list = lattice.gamma2mLine(); }
+            else { throw std::runtime_error("Measurement::Handle::initialize(): invalid momentum list."); }
+        }
+        else if (auto momentum_list = std::get_if<std::vector<int>>(&params.momentum_list)) {
+            const int nkstars = lattice.allKstars().size();
+            if (std::any_of(momentum_list->begin(), momentum_list->end(), [=](int i){return i >= nkstars;})) {
+                throw std::runtime_error("Measurement::Handle::initialize(): index of momentum out of range.");
+            }
+            this->m_momentum_list = *momentum_list;
+        }
 
         // initialize Observable::Handle
         Observable::Handle::initialize(this->m_list);
