@@ -57,17 +57,17 @@ namespace DQMC {
     {
         if (meas_handle.isWarmUp()) {
             // create the progress bar
-            progresscpp::ProgressBar progressbar(std::ceil(meas_handle.WarmUpSweeps()/2),     // total loops 
-                                                 Handle::m_progress_bar_width,             // bar width
-                                                 Handle::m_progress_bar_complete_char,     // complete character
-                                                 Handle::m_progress_bar_incomplete_char    // incomplete character
+            progresscpp::ProgressBar progressbar(std::ceil(meas_handle.WarmUpSweeps()/2.),  // total loops 
+                                                 Handle::m_progress_bar_width,              // bar width
+                                                 Handle::m_progress_bar_complete_char,      // complete character
+                                                 Handle::m_progress_bar_incomplete_char     // incomplete character
                                                 );
             // display the progress bar
             if (Handle::m_show_progress_bar) { std::cout << ">> Warming up "; progressbar.display(); }
 
             // warm-up sweeps
             core.set_thermalization(true);
-            for (int sweep = 1; sweep <= std::ceil(meas_handle.WarmUpSweeps()/2); ++sweep) {
+            for (int sweep = 1; sweep <= std::ceil(meas_handle.WarmUpSweeps()/2.); ++sweep) {
                 // sweep forth and back without measurments
                 core.sweep_from_0_to_beta(model);
                 core.sweep_from_beta_to_0(model);
@@ -93,8 +93,8 @@ namespace DQMC {
     {
         if (meas_handle.isEqualTime() || meas_handle.isDynamic()) {
             // create the progress bar
-            const int binsize = (meas_handle.isDynamic())? meas_handle.BinsCapacity() : std::ceil(meas_handle.BinsCapacity()/2);
-            const int total_ticks = meas_handle.BinsNum() * (binsize + std::ceil(meas_handle.SweepsBetweenBins()/2));
+            const int binsize = (meas_handle.isDynamic())? meas_handle.BinsCapacity() : std::ceil(meas_handle.BinsCapacity()/2.);
+            const int total_ticks = meas_handle.BinsNum() * (binsize + std::ceil(meas_handle.SweepsBetweenBins()/2.));
             progresscpp::ProgressBar progressbar(total_ticks,
                                                  Handle::m_progress_bar_width,
                                                  Handle::m_progress_bar_complete_char,
@@ -107,9 +107,9 @@ namespace DQMC {
             core.set_thermalization(false);
             for (int bin = 0; bin < meas_handle.BinsNum(); ++bin) {
                 // avoid correlations between adjoining bins
-                for (int sweep = 1; sweep <= std::ceil(meas_handle.SweepsBetweenBins()/2); ++sweep) {
+                for (int sweep = 1; sweep <= std::ceil(meas_handle.SweepsBetweenBins()/2.); ++sweep) {
                     // record the tick
-                    const int current_tick = sweep + bin*(binsize+std::ceil(meas_handle.SweepsBetweenBins()/2));
+                    const int current_tick = sweep + bin*(binsize+std::ceil(meas_handle.SweepsBetweenBins()/2.));
                     core.sweep_from_0_to_beta(model);
                     core.sweep_from_beta_to_0(model);
 
@@ -121,7 +121,7 @@ namespace DQMC {
 
                 for (int sweep = 1; sweep <= binsize; ++sweep) {
                     // record the tick
-                    const int current_tick = sweep + bin*binsize + (bin+1)*std::ceil(meas_handle.SweepsBetweenBins()/2);
+                    const int current_tick = sweep + bin*binsize + (bin+1)*std::ceil(meas_handle.SweepsBetweenBins()/2.);
 
                     // sweep forth from 0 to beta
                     if (meas_handle.isDynamic()) {
