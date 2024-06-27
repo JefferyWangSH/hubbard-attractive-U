@@ -91,7 +91,7 @@ namespace DQMC {
 
             params.sweeps_warmup = config["Measurement"]["sweeps_warmup"].value_or(1000);
             // distribute the measurement tasks to a batch of processors
-            params.bin_num = std::ceil(config["Measurement"]["bin_num"].value_or(20) / world_size);
+            params.bin_num = std::ceil(config["Measurement"]["bin_num"].value_or(20) / static_cast<double>(world_size));
             params.bin_capacity = config["Measurement"]["bin_capacity"].value_or(100);
             params.sweeps_between_bins = config["Measurement"]["sweeps_between_bins"].value_or(10);
             
