@@ -48,7 +48,11 @@ namespace Utils {
                 boost::mpi::wait_all(recvs.begin(), recvs.end());
 
                 // reset the observable shape
-                obs.set_shape(world.size()*obs.nbin(), obs.obsShape());
+                std::size_t total_nbin = cache[0].shape(0);
+                for (auto proc = 1; proc < world.size(); ++proc) {
+                    total_nbin += cache[proc].shape(0);
+                }
+                obs.set_shape(total_nbin, obs.obsShape());
                 
                 // gather observable data to the main object
                 xt::noalias(*obs.data()) = cache[0];

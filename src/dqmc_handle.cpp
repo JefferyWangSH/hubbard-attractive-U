@@ -57,11 +57,13 @@ namespace DQMC {
     {
         if (meas_handle.isWarmUp()) {
             // create the progress bar
-            progresscpp::ProgressBar progressbar(std::ceil(meas_handle.WarmUpSweeps()/2.),  // total loops 
-                                                 Handle::m_progress_bar_width,              // bar width
-                                                 Handle::m_progress_bar_complete_char,      // complete character
-                                                 Handle::m_progress_bar_incomplete_char     // incomplete character
-                                                );
+            progresscpp::ProgressBar progressbar(
+                std::ceil(meas_handle.WarmUpSweeps()/2.),  // total loops 
+                Handle::m_progress_bar_width,              // bar width
+                Handle::m_progress_bar_complete_char,      // complete character
+                Handle::m_progress_bar_incomplete_char     // incomplete character
+            );
+
             // display the progress bar
             if (Handle::m_show_progress_bar) { std::cout << ">> Warming up "; progressbar.display(); }
 
@@ -94,11 +96,13 @@ namespace DQMC {
         if (meas_handle.isEqualTime() || meas_handle.isDynamic()) {
             // create the progress bar
             const int binsize = (meas_handle.isDynamic())? meas_handle.BinsCapacity() : std::ceil(meas_handle.BinsCapacity()/2.);
-            const int total_ticks = meas_handle.BinsNum() * (binsize + std::ceil(meas_handle.SweepsBetweenBins()/2.));
-            progresscpp::ProgressBar progressbar(total_ticks,
-                                                 Handle::m_progress_bar_width,
-                                                 Handle::m_progress_bar_complete_char,
-                                                 Handle::m_progress_bar_incomplete_char);
+            const int total_ticks = meas_handle.BinsNum() * (binsize + std::ceil(meas_handle.SweepsBetweenBins()/2.)); // in unit of forth-and-back sweep
+            progresscpp::ProgressBar progressbar(
+                total_ticks,
+                Handle::m_progress_bar_width,
+                Handle::m_progress_bar_complete_char,
+                Handle::m_progress_bar_incomplete_char
+            );
             
             // display the progress bar
             if (Handle::m_show_progress_bar) { std::cout << ">> Measuring  "; progressbar.display(); }
@@ -127,7 +131,7 @@ namespace DQMC {
                     if (meas_handle.isDynamic()) {
                         core.sweep_for_dynamic_green_functions(model);
                         meas_handle.measure_dynamic_observables(core, model, lattice);
-                        // donot measure equal-time observables at this step
+                        // do not measure equal-time observables at this step
                     }
                     else {
                         core.sweep_from_0_to_beta(model);

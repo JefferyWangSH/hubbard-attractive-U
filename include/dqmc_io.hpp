@@ -79,11 +79,13 @@ namespace DQMC {
                     << fmt_param_str % "Warm up" % joiner % bool2str(meas_handle.isWarmUp())
                     << fmt_param_str % "Equal-time measure" % joiner % bool2str(meas_handle.isEqualTime())
                     << fmt_param_str % "Dynamic measure" % joiner % bool2str(meas_handle.isDynamic());
-                
-            ostream << fmt_param_int % "Sweeps for warmup" % joiner % meas_handle.WarmUpSweeps()
+
+            ostream << fmt_param_int % "Sweeps for warmup" % joiner % (2*std::ceil(meas_handle.WarmUpSweeps()/2.))
                     << fmt_param_int % "Number of bins" % joiner % (meas_handle.BinsNum() * nproc)
-                    << fmt_param_int % "Sweeps per bin" % joiner % meas_handle.BinsCapacity()
-                    << fmt_param_int % "Sweeps between bins" % joiner % meas_handle.SweepsBetweenBins()
+                    << fmt_param_int % "Sweeps per bin" % joiner % (
+                        (!meas_handle.isDynamic() && meas_handle.isEqualTime())? 2*std::ceil(meas_handle.BinsCapacity()/2.) : meas_handle.BinsCapacity()
+                    )
+                    << fmt_param_int % "Sweeps between bins" % joiner % (2*std::ceil(meas_handle.SweepsBetweenBins()/2.))
                     << std::endl;
         }
         
